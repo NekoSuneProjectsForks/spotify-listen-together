@@ -18,6 +18,7 @@ import {
 } from './utils/spotifyUtils';
 
 const AD_CHECK_INTERVAL = 2000;
+const SYNC_INTERVAL = 1000;
 export default class LTPlayer {
   client = new Client(this);
   patcher = new Patcher(this);
@@ -25,6 +26,7 @@ export default class LTPlayer {
   settingsManager = new SettingsManager(Spicetify.LocalStorage);
   ui = new UI(this);
   isHost = false;
+  isPlaybackLeader = false;
   version = pJson.version;
   watchingAd = false;
   trackLoaded = true;
@@ -46,6 +48,10 @@ export default class LTPlayer {
       this.resumeTrackIfAdPlaying();
     }, AD_CHECK_INTERVAL);
 
+    setInterval(() => {
+      this.syncPlaybackHeartbeat();
+    }, SYNC_INTERVAL);
+
     // this.volumeChangeEnabled = !!ogPlayerAPI.setVolume;
 
     // For testing
@@ -64,6 +70,26 @@ export default class LTPlayer {
 
   requestChangeSong(trackUri: string) {
     this.client.socket?.emit('requestChangeSong', trackUri);
+  }
+
+  canControlPlayback() {
+    return this.isHost || this.isPlaybackLeader;
+  }
+
+  private syncPlaybackHeartbeat() {
+    if (!this.client.connected || !this.canControlPlayback() || !this.trackLoaded) {
+      return;
+    }
+
+    if (!isListenableTrackType(getTrackType())) {
+      return;
+    }
+
+    this.client.socket?.emit(
+      'requestUpdateSong',
+      isTrackPaused(),
+      Spicetify.Player.getProgress(),
+    );
   }
 
   requestUpdateSong(paused: boolean, milliseconds: number) {
@@ -218,7 +244,7 @@ export default class LTPlayer {
 
         this.spotifyUtils.onTrackLoaded(trackUri!, () => {
           this.trackLoaded = true;
-          if (!this.isHost) {
+          if (!this.canControlPlayback()) {
             pauseTrack();
             ogPlayerAPI.seekTo(0);
           }

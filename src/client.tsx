@@ -165,19 +165,23 @@ export default class Client {
     });
 
     this.socket.on('adminSkipToNext', () => {
-      if (this.ltPlayer.isHost) {
+      if (this.ltPlayer.canControlPlayback()) {
         this.ltPlayer.skipToNextTrack();
       }
     });
 
+    this.socket.on('playbackLeader', (isPlaybackLeader: boolean) => {
+      this.ltPlayer.isPlaybackLeader = isPlaybackLeader;
+    });
+
     this.socket.on('adminPlayTrack', (trackUri: string) => {
-      if (this.ltPlayer.isHost && trackUri) {
+      if (this.ltPlayer.canControlPlayback() && trackUri) {
         forcePlayTrack(trackUri);
       }
     });
 
     this.socket.on('adminPlayFallback', (contextUri: string) => {
-      if (this.ltPlayer.isHost && contextUri) {
+      if (this.ltPlayer.canControlPlayback() && contextUri) {
         forcePlay({ uri: contextUri }, {}, {});
       }
     });

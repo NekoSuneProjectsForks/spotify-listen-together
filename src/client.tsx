@@ -3,6 +3,7 @@ import LTPlayer from './ltPlayer';
 import React from 'react';
 import BottomInfo from './ui/bottomInfo';
 import {
+  forcePlay,
   forcePlayTrack,
   getCurrentTrackUri,
   getTrackType,
@@ -161,6 +162,24 @@ export default class Client {
 
     this.socket.on('clearQueue', () => {
       this.ltPlayer.onClearQueue();
+    });
+
+    this.socket.on('adminSkipToNext', () => {
+      if (this.ltPlayer.isHost) {
+        this.ltPlayer.skipToNextTrack();
+      }
+    });
+
+    this.socket.on('adminPlayTrack', (trackUri: string) => {
+      if (this.ltPlayer.isHost && trackUri) {
+        forcePlayTrack(trackUri);
+      }
+    });
+
+    this.socket.on('adminPlayFallback', (contextUri: string) => {
+      if (this.ltPlayer.isHost && contextUri) {
+        forcePlay({ uri: contextUri }, {}, {});
+      }
     });
 
     this.socket.on('connect_error', () => {

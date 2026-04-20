@@ -120,7 +120,7 @@ export default class UI {
       this.joinServerPopup((btn, address, name, autoConnect) => {
         if (btn === 'Host a server') {
           window.location.href =
-            'https://heroku.com/deploy?template=https://github.com/FlafyDev/spotify-listen-together-server';
+            'https://heroku.com/deploy?template=https://github.com/NekoSuneProjects/spotify-listen-together-server';
         } else {
           Popup.close();
           if (!!address && !!name) {
@@ -164,14 +164,14 @@ export default class UI {
       [],
       [
         <Popup.Text
-          text={`Listen Together v${pJson.version} created by FlafyDev`}
+          text={`Listen Together v${pJson.version} created by NekoSuneProjects fork of FlafyDev`}
           centered={false}
         />,
         <Popup.Button
           text={'Github'}
           onClick={() =>
             (window.location.href =
-              'https://github.com/FlafyDev/spotify-listen-together')
+              'https://github.com/NekoSuneProjects/spotify-listen-together')
           }
         />,
       ],

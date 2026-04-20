@@ -103,6 +103,10 @@ export default class LTPlayer {
     this.client.socket?.emit('clearQueue');
   }
 
+  skipToNextTrack() {
+    ogPlayerAPI.skipToNext();
+  }
+
   // Server emitted events
   onQueueUpdate(queue: Spicetify.ContextTrack[]) {
     ogPlayerAPI.clearQueue();
@@ -154,17 +158,33 @@ export default class LTPlayer {
 
         this.spotifyUtils.onTrackLoaded(trackUri!, () => {
           this.trackLoaded = true;
-          pauseTrack();
-          ogPlayerAPI.seekTo(0);
+          if (!this.isHost) {
+            pauseTrack();
+            ogPlayerAPI.seekTo(0);
+          }
 
-          // Extract image url safely
-          const imageUrl =
-            Spicetify.Platform.PlayerAPI._state?.item?.images?.[0]?.['url'];
+          const currentItem = Spicetify.Platform.PlayerAPI._state?.item;
+          const imageUrl = currentItem?.images?.[0]?.['url'] || '';
           this.client.socket?.emit(
             'changedSong',
             trackUri,
-            Spicetify.Platform.PlayerAPI._state?.item?.name,
-            imageUrl,
+            {
+              name: currentItem?.name || '',
+              image: imageUrl,
+              artistName:
+                currentItem?.artists
+                  ?.map((artist: any) => artist.name)
+                  .join(', ') || '',
+              artists:
+                currentItem?.artists?.map((artist: any) => artist.name) || [],
+              albumName: currentItem?.album?.name || '',
+              durationMs:
+                currentItem?.duration?.milliseconds ||
+                currentItem?.duration?.totalMilliseconds ||
+                0,
+              trackUri,
+              paused: isTrackPaused(),
+            },
           );
 
           // Change volume back to normal

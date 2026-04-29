@@ -89,7 +89,7 @@ export default class LTPlayer {
         '';
       const updateUrl =
         data.updateUrl ||
-        'https://github.com/NekoSuneProjects/spotify-listen-together/releases/latest';
+        'https://github.com/NekoSuneProjectsForks/spotify-listen-together/releases/latest';
 
       if (!nextVersion || compareVersions(nextVersion, this.version) <= 0) {
         if (forceNotify) {

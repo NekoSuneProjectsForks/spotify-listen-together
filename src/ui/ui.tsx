@@ -177,7 +177,7 @@ export default class UI {
     this.joinSessionPopup((btn, address, sessionId, name, autoConnect) => {
       if (btn === 'Host a server') {
         window.location.href =
-          'https://render.com/deploy?repo=https://github.com/NekoSuneProjects/spotify-listen-together-server';
+          'https://render.com/deploy?repo=https://github.com/NekoSuneProjectsForks/spotify-listen-together-server';
         return;
       }
 
@@ -418,7 +418,7 @@ export default class UI {
           text={'Github'}
           onClick={() =>
             (window.location.href =
-              'https://github.com/NekoSuneProjects/spotify-listen-together')
+              'https://github.com/NekoSuneProjectsForks/spotify-listen-together')
           }
         />,
       ],

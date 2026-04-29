@@ -40,3 +40,18 @@ export function buildSessionInviteUrl(server: string, sessionId: string) {
 
   return buildApiUrl(server, `/session/${encodeURIComponent(sessionId)}`);
 }
+
+export function buildSessionHostUrl(
+  server: string,
+  sessionId: string,
+  hostPassword?: string,
+) {
+  const inviteUrl = buildSessionInviteUrl(server, sessionId);
+  if (!inviteUrl || !hostPassword) {
+    return inviteUrl;
+  }
+
+  const url = new URL(inviteUrl);
+  url.searchParams.set('hostPassword', hostPassword);
+  return url.toString();
+}

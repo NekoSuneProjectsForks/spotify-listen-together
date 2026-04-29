@@ -6,9 +6,11 @@ import { Popup } from './popup';
 import iconSvg from './ListenTogetherIcon';
 import pJson from '../../package.json';
 import {
+  buildSessionHostUrl,
   buildSessionInviteUrl,
   parseSessionTarget,
 } from '../utils/sessionUrl';
+import { openExternalUrl } from '../utils/openExternalUrl';
 
 import '../css/ui.scss';
 
@@ -228,13 +230,21 @@ export default class UI {
         settings.autoConnect = autoConnect;
         this.ltPlayer.settingsManager.saveSettings();
 
+        const hostUrl = buildSessionHostUrl(server, session.id, session.hostPassword);
         Popup.close();
         if (this.ltPlayer.client.connected || this.ltPlayer.client.connecting) {
           this.ltPlayer.client.disconnect(false);
         }
         this.ltPlayer.client.connect(server);
         if (session.hostPassword) {
-          this.bottomMessage('Session created. Host password saved in the plugin.');
+          navigator.clipboard?.writeText(hostUrl || session.hostPassword);
+          openExternalUrl(hostUrl);
+          this.sessionCreatedPopup(hostUrl, session.hostPassword);
+          this.bottomMessage('Session created. Host password saved and page opened.');
+        } else {
+          this.windowMessage(
+            'Session created, but the server did not return a host password. Update/restart the server and try creating a new session.',
+          );
         }
       } catch (error: any) {
         this.windowMessage(error?.message || 'Session could not be created.');
@@ -324,6 +334,36 @@ export default class UI {
     navigator.clipboard?.writeText(inviteUrl);
     this.bottomMessage('Listen Together invite URL copied.');
     Popup.close();
+  }
+
+  private sessionCreatedPopup(hostUrl: string, hostPassword: string) {
+    Popup.create(
+      'Session Created',
+      (btn) => {
+        if (btn === 'Open page') {
+          openExternalUrl(hostUrl);
+        }
+
+        if (btn === 'Copy password') {
+          navigator.clipboard?.writeText(hostPassword);
+          this.bottomMessage('Host password copied.');
+        }
+
+        if (btn === 'Copy URL') {
+          navigator.clipboard?.writeText(hostUrl);
+          this.bottomMessage('Host page URL copied.');
+        }
+
+        if (btn === 'OK') {
+          Popup.close();
+        }
+      },
+      ['Open page', 'Copy password', 'Copy URL', 'OK'],
+      [
+        <Popup.Text text="Your browser should open the session page with the host password." />,
+        <Popup.Text text={`Host password: ${hostPassword}`} />,
+      ],
+    );
   }
 
   private onClickPluginSettings() {

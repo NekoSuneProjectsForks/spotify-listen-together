@@ -16,6 +16,7 @@ type SessionInfo = {
   name: string;
   isPublic: boolean;
   url: string;
+  hostPassword?: string;
 };
 
 export default class Client {
@@ -279,7 +280,6 @@ export default class Client {
     server: string,
     sessionName: string,
     isPublic: boolean,
-    hostPassword: string,
   ) {
     const response = await fetch(buildApiUrl(server, '/api/sessions'), {
       method: 'POST',
@@ -287,7 +287,6 @@ export default class Client {
       body: JSON.stringify({
         name: sessionName,
         isPublic,
-        hostPassword,
       }),
     });
     const data = await response.json();

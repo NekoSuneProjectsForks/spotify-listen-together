@@ -200,15 +200,14 @@ export default class UI {
       serverInput,
       sessionName,
       displayName,
-      password,
       isPublic,
       autoConnect,
     ) => {
       const target = parseSessionTarget(serverInput);
       const server = target.server || serverInput.trim();
 
-      if (!server || !password || !displayName) {
-        this.windowMessage('Server, display name, and host password are required.');
+      if (!server || !displayName) {
+        this.windowMessage('Server and display name are required.');
         return;
       }
 
@@ -217,7 +216,6 @@ export default class UI {
           server,
           sessionName,
           isPublic,
-          password,
         );
 
         const settings = this.ltPlayer.settingsManager.settings;
@@ -226,7 +224,7 @@ export default class UI {
         settings.sessionName = session.name;
         settings.sessionPublic = session.isPublic;
         settings.name = displayName;
-        settings.password = password;
+        settings.password = session.hostPassword || '';
         settings.autoConnect = autoConnect;
         this.ltPlayer.settingsManager.saveSettings();
 
@@ -235,6 +233,9 @@ export default class UI {
           this.ltPlayer.client.disconnect(false);
         }
         this.ltPlayer.client.connect(server);
+        if (session.hostPassword) {
+          this.bottomMessage('Session created. Host password saved in the plugin.');
+        }
       } catch (error: any) {
         this.windowMessage(error?.message || 'Session could not be created.');
       }
@@ -443,7 +444,6 @@ export default class UI {
       server: string,
       sessionName: string,
       displayName: string,
-      password: string,
       isPublic: boolean,
       autoConnect: boolean,
     ) => void,
@@ -452,7 +452,6 @@ export default class UI {
     let server = settings.server;
     let sessionName = settings.sessionName || 'Listen Together Session';
     let displayName = settings.name;
-    let password = settings.password;
     let isPublic = settings.sessionPublic;
     let autoConnect = settings.autoConnect;
 
@@ -460,7 +459,7 @@ export default class UI {
       'Create Session',
       (btn) => {
         if (btn === 'Create') {
-          callback(server, sessionName, displayName, password, isPublic, autoConnect);
+          callback(server, sessionName, displayName, isPublic, autoConnect);
         } else {
           Popup.close();
         }
@@ -484,11 +483,6 @@ export default class UI {
           example="Joe"
           defaultValue={displayName}
           onInput={(text) => (displayName = text)}
-        />,
-        <Popup.Textbox
-          name="Host password"
-          defaultValue={password}
-          onInput={(text) => (password = text)}
         />,
         <Popup.Checkbox
           label="Public session"
